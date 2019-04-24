@@ -1,8 +1,8 @@
 import '../scss/app.scss';
-import {Router} from './components/Router';
-import {routes} from './routes';
+import Router from "./router/Router";
+import {routes} from "./routes";
 
-// Create router
+// Create and register router to events
 const router = new Router(document.getElementById('root'), routes);
 
 window.addEventListener('load', router.route);
