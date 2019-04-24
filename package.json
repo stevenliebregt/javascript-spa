@@ -7,7 +7,9 @@
     "build:watch": "webpack --env dev --watch",
     "build:prod": "webpack --env prod",
     "start:dev": "webpack-dev-server --hot --inline --env dev",
-    "start:prod": "npm run build:prod && http-server ./dist"
+    "start:prod": "npm run build:prod && http-server ./dist",
+    "start": "node server.js",
+    "heroku-postbuild": "npm run build:prod"
   },
   "keywords": [
     "spa",
@@ -36,6 +38,7 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
+    "express": "^4.16.4",
     "http-server": "^0.11.1"
   }
 }
