@@ -2,7 +2,12 @@ import Component from "../components/Component";
 
 export default class Number extends Component {
   render() {
-    const random = Math.floor(Math.random() * 10);
+    const rand = () => Math.floor(Math.random() * 10);
+
+    let random = rand();
+    while (random === parseInt(this.parameters.number)) {
+      random = rand();
+    }
 
     return `
       <h1>Number: ${this.parameters.number}</h1>
