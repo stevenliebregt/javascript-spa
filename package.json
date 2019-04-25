@@ -12,10 +12,12 @@
   },
   "keywords": [
     "spa",
-    "javascript"
+    "javascript",
+    "scaffolding",
+    "homemade"
   ],
   "author": "Steven Liebregt <stevenliebregt@outlook.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
@@ -37,7 +39,6 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
-    "express": "^4.16.4",
-    "http-server": "^0.11.1"
+    "express": "^4.16.4"
   }
 }

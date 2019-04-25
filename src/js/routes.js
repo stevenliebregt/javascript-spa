@@ -1,20 +1,14 @@
 import Home from "./screens/Home";
 import About from "./screens/About";
-import Random from "./screens/Random";
+import Number from "./screens/Number";
 
 export const routes = {
   '/': Home,
   '/about-this': About,
-  '/random/:random': {
-    page: Random,
+  '/number/:number': {
+    page: Number,
     parameters: {
-      random: '\\d+',
+      number: '\\d+',
     },
-  },
-  '/invalid/:_k1': {
-    page: Home,
-    parameters: {
-      _k1: '[a-z]',
-    }
   },
 };
