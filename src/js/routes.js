@@ -11,4 +11,10 @@ export const routes = {
       random: '\\d+',
     },
   },
+  '/invalid/:_k1': {
+    page: Home,
+    parameters: {
+      _k1: '[a-z]',
+    }
+  },
 };

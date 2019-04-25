@@ -1,6 +1,8 @@
 import Component from "../components/Component";
 import Error404 from "../screens/Error404";
 
+const ROUTE_KEY_REGEX = /^_k(?<index>\d+)$/;
+
 export default class Router {
   constructor(rootElement, routes) {
     this.rootElement = rootElement;
@@ -47,10 +49,14 @@ export default class Router {
   };
 
   transform = (url, parameters) => {
-    let matches = url.match(/:([a-z]+)/ig);
+    let matches = url.match(/:([a-z0-9_\-]+)/ig);
 
     for (let match of matches) {
       let name = match.substring(1);
+      if (ROUTE_KEY_REGEX.test(name)) {
+        console.error(`Parameter names may not match the format ${ROUTE_KEY_REGEX}`);
+        continue;
+      }
 
       if (!(name in parameters)) {
         console.error(`Parameter "${name}" has no description in route definition`);
@@ -84,7 +90,7 @@ export default class Router {
     }
 
     for (let [key, value] of Object.entries(match.groups)) {
-      let indexMatch = /^_k(?<index>\d+)$/.exec(key);
+      let indexMatch = ROUTE_KEY_REGEX.exec(key);
       if (!(indexMatch) || typeof value === 'undefined') {
         continue;
       }
