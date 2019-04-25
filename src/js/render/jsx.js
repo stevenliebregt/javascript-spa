@@ -1,6 +1,6 @@
 import {config} from '../config';
 
-const PARAMETER_REGEX = new RegExp(`${config.jsxPlaceholderPrefix || '__'}(?<index>\d+)`);
+const PARAMETER_REGEX = new RegExp(`${config.jsxPlaceholderPrefix || '__'}(?<index>\\d+)`);
 
 export default function jsx(parts, ...parameters) {
   let htmlString = createHtmlString(parts);
@@ -49,7 +49,11 @@ function processParameters(node, parameters)
       return undefined;
     }
 
-    // TODO: parameters
+    let match = value.match(PARAMETER_REGEX);
+
+    if (match) {
+      value = value.replace(PARAMETER_REGEX, parameters[match.groups.index]);
+    }
 
     return value;
   }
@@ -57,6 +61,7 @@ function processParameters(node, parameters)
   let element = document.createElement(node.localName);
 
   // Handle attributes
+
 
   // Handle children
   for (let childNode of node.childNodes) {
