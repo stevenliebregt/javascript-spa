@@ -2,6 +2,7 @@ import Component from "../components/Component";
 import Error404 from "../screens/Error404";
 
 const ROUTE_KEY_REGEX = /^_k(?<index>\d+)$/;
+const PARAMETER_REGEX = /:([a-z0-9_\-]+)/ig;
 
 export default class Router {
   constructor(rootElement, routes) {
@@ -49,12 +50,12 @@ export default class Router {
   };
 
   transform = (url, parameters) => {
-    let matches = url.match(/:([a-z0-9_\-]+)/ig);
+    let matches = url.match(PARAMETER_REGEX);
 
     for (let match of matches) {
       let name = match.substring(1);
       if (ROUTE_KEY_REGEX.test(name)) {
-        console.error(`Parameter names may not match the format ${ROUTE_KEY_REGEX}`);
+        console.error(`Parameter names must match the format ${PARAMETER_REGEX}`);
         continue;
       }
 
