@@ -5,6 +5,7 @@ export default class Router {
   constructor(rootElement, routes) {
     this.rootElement = rootElement;
     this.routes = this.parse(routes);
+    this.regex = this.createRegex();
   }
 
   parse = (routes, prefix = '', parameters = {}, parsedRoutes = {}) => {
@@ -62,16 +63,51 @@ export default class Router {
     return url;
   };
 
-  route = () => {
-    let request = location.hash.slice(1).toLowerCase() || '/';
+  createRegex = () => {
+    let routes = [];
 
-    // TODO: Match
+    Object.keys(this.routes).forEach((route, index) => {
+      routes.push(`(?<_k${index}>${route})`);
+    });
 
-    return this.render(Error404);
+    return new RegExp(`^(?:${routes.join('|')})$`);
   };
 
-  render = (page) => {
-    let instance = Object.create(page.prototype);
+  route = () => {
+    let request = location.hash.slice(1).toLowerCase() || '/';
+    let match = this.regex.exec(request);
+
+    if (match === null) {
+      return this.render({
+        page: Error404,
+      });
+    }
+
+    for (let [key, value] of Object.entries(match.groups)) {
+      let indexMatch = /^_k(?<index>\d+)$/.exec(key);
+      if (!(indexMatch) || typeof value === 'undefined') {
+        continue;
+      }
+
+      let index = parseInt(indexMatch.groups.index);
+      let route = Object.values(this.routes)[index];
+
+      return this.render(route, match.groups);
+    }
+
+    return this.render({
+      page: Error404,
+    });
+  };
+
+  render = (route, matches = {}) => {
+    let instance = Object.create(route.page.prototype);
+
+    for (let key of Object.keys(route.parameters)) {
+      if (key in matches) {
+        instance.parameters[key] = matches[key];
+      }
+    }
 
     this.rootElement.innerHTML = instance.render();
   };

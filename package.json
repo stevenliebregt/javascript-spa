@@ -6,8 +6,7 @@
     "build:dev": "webpack --env dev",
     "build:watch": "webpack --env dev --watch",
     "build:prod": "webpack --env prod",
-    "start:dev": "webpack-dev-server --hot --inline --env dev",
-    "start:prod": "npm run build:prod && http-server ./dist",
+    "dev": "webpack-dev-server --hot --inline --env dev",
     "start": "node server.js",
     "heroku-postbuild": "npm run build:prod"
   },
