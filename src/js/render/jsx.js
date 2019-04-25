@@ -49,9 +49,8 @@ function processParameters(node, parameters)
       return undefined;
     }
 
-    let match = value.match(PARAMETER_REGEX);
-
-    if (match) {
+    let match;
+    while ((match = value.match(PARAMETER_REGEX)) !== null) {
       value = value.replace(PARAMETER_REGEX, parameters[match.groups.index]);
     }
 

@@ -3,7 +3,8 @@ import jsx from '../render/jsx';
 
 export default class Home extends Component {
   render() {
-    const param = 123;
+    const foo = 123;
+    const bar = 456;
 
     return jsx`
 <div>
@@ -11,7 +12,7 @@ export default class Home extends Component {
   <div class="sub">
     <p>This is subtext</p>
   </div>
-  <p>Test: ${param}</p>
+  <p>Test: ${foo} &amp; ${bar}</p>
   <button onclick="${this.onClick}">Click</button>
 </div>
     `;
