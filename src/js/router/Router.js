@@ -101,9 +101,9 @@ export default class Router {
   };
 
   render = (route, matches = {}) => {
-    let instance = Object.create(route.page.prototype);
+    let instance = new route.page();
 
-    for (let key of Object.keys(route.parameters)) {
+    for (let key of Object.keys(route.parameters || {})) {
       if (key in matches) {
         instance.parameters[key] = matches[key];
       }
