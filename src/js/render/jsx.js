@@ -6,6 +6,7 @@
 import {config} from '../config';
 
 const PARAMETER_REGEX = new RegExp(`${config.jsxPlaceholderPrefix || '__'}(?<index>\\d+)`);
+const EVENT_ATTRIBUTE_REGEX = /^on(?<event>[a-zA-Z]+)$/;
 
 export default function jsx(parts, ...parameters) {
   let htmlString = createHtmlString(parts);
@@ -13,7 +14,7 @@ export default function jsx(parts, ...parameters) {
   let parser = new DOMParser();
   let html = parser.parseFromString(htmlString, 'text/xml');
 
-  return processParameters(html.firstChild, parameters);
+  return processHtml(html.firstChild, parameters);
 }
 
 /**
@@ -38,7 +39,7 @@ function createHtmlString(parts) {
   return htmlString;
 }
 
-function processParameters(node, parameters)
+function processHtml(node, parameters)
 {
   // Check if it is a text node.
   if (node.nodeValue) {
@@ -49,24 +50,27 @@ function processParameters(node, parameters)
       return undefined;
     }
 
-    let match;
-    while ((match = value.match(PARAMETER_REGEX)) !== null) {
-      value = value.replace(PARAMETER_REGEX, parameters[match.groups.index]);
-    }
-
-    return value;
+    return processParameters(value, parameters);
   }
 
   let element = document.createElement(node.localName);
 
   // Handle attributes
   if (node.attributes.length > 0) {
-    
+    /** @var {Attr} attribute */
+    for (let attribute of node.attributes) {
+      let match = attribute.name.match(EVENT_ATTRIBUTE_REGEX);
+      if (match) {
+        // TODO: Is Event
+      } else {
+        element.setAttribute(attribute.name, processParameters(attribute.value, parameters));
+      }
+    }
   }
 
   // Handle children
   for (let childNode of node.childNodes) {
-    let childElement = processParameters(childNode, parameters);
+    let childElement = processHtml(childNode, parameters);
 
     if (typeof childElement === 'undefined') {
       continue;
@@ -78,4 +82,14 @@ function processParameters(node, parameters)
   }
 
   return element;
+}
+
+function processParameters(text, parameters) {
+  let match;
+
+  while ((match = text.match(PARAMETER_REGEX)) !== null) {
+    text = text.replace(PARAMETER_REGEX, parameters[match.groups.index]);
+  }
+
+  return text;
 }
