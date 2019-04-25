@@ -11,11 +11,13 @@ export default class Number extends Component {
     }
 
     return jsx`
-      <h1>Number: ${this.parameters.number}</h1>
-      <p>
+      <div>
+        <h1>Number: ${this.parameters.number}</h1>
+        <p>
           Go to a page with a random number between 0 and 10: 
           <a href='#/number/${random}'>Number ${random}</a>
-      </p>
+        </p>
+      </div>
     `;
   };
 }
