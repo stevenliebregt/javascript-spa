@@ -1,3 +1,8 @@
+/**
+ * I was inspired by the following Gist: https://gist.github.com/lygaret/a68220defa69174bdec5 to build this without
+ * using React.
+ */
+
 import {config} from '../config';
 
 const PARAMETER_REGEX = new RegExp(`${config.jsxPlaceholderPrefix || '__'}(?<index>\\d+)`);
@@ -7,14 +12,8 @@ export default function jsx(parts, ...parameters) {
 
   let parser = new DOMParser();
   let html = parser.parseFromString(htmlString, 'text/xml');
-  html = processParameters(html.firstChild, parameters); // TODO: No firstChild, but loop
 
-
-  // let template = document.createElement('template');
-  // template.innerHTML = htmlString;
-  // let html = template.content;
-
-  return html;
+  return processParameters(html.firstChild, parameters);
 }
 
 /**
@@ -43,7 +42,8 @@ function processParameters(node, parameters)
 {
   // Check if it is a text node.
   if (node.nodeValue) {
-    let value = node.nodeValue.trim();
+    let value = node.nodeValue; // TODO: Check this
+    // let value = node.nodeValue.trim();
 
     if (value.length === 0) {
       return undefined;
@@ -60,7 +60,9 @@ function processParameters(node, parameters)
   let element = document.createElement(node.localName);
 
   // Handle attributes
-
+  if (node.attributes.length > 0) {
+    
+  }
 
   // Handle children
   for (let childNode of node.childNodes) {
