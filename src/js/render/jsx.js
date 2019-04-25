@@ -61,7 +61,7 @@ function processHtml(node, parameters)
     for (let attribute of node.attributes) {
       let match = attribute.name.match(EVENT_ATTRIBUTE_REGEX);
       if (match) {
-        // TODO: Is Event
+        element.addEventListener(match.groups.event, processParameters(attribute.value, parameters, true));
       } else {
         element.setAttribute(attribute.name, processParameters(attribute.value, parameters));
       }
@@ -84,11 +84,21 @@ function processHtml(node, parameters)
   return element;
 }
 
-function processParameters(text, parameters) {
+function processParameters(text, parameters, isEvent = false) {
   let match;
 
   while ((match = text.match(PARAMETER_REGEX)) !== null) {
-    text = text.replace(PARAMETER_REGEX, parameters[match.groups.index]);
+    let parameter = parameters[match.groups.index];
+
+    if (typeof parameter === 'function') {
+      if (isEvent) {
+        return parameter;
+      }
+
+      // TODO: Nested JSX
+    }
+
+    text = text.replace(PARAMETER_REGEX, parameter);
   }
 
   return text;
