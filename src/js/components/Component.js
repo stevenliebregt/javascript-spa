@@ -1,8 +1,6 @@
 export default class Component {
-  constructor(props = {}) {
+  constructor() {
     this.parameters = {};
-
-    console.log(props);
   }
 
   render() {

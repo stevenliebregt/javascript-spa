@@ -116,6 +116,12 @@ export default class Router {
       }
     }
 
-    this.rootElement.innerHTML = instance.render();
+    // Remove old HTML
+    while (this.rootElement.hasChildNodes()) {
+      this.rootElement.removeChild(this.rootElement.firstChild);
+    }
+
+    // Set new HTML
+    this.rootElement.appendChild(instance.render());
   };
 }

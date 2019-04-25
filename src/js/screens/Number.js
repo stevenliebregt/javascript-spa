@@ -1,4 +1,5 @@
 import Component from '../components/Component';
+import jsx from '../render/jsx';
 
 export default class Number extends Component {
   render() {
@@ -9,7 +10,7 @@ export default class Number extends Component {
       random = rand();
     }
 
-    return `
+    return jsx`
       <h1>Number: ${this.parameters.number}</h1>
       <p>
           Go to a page with a random number between 0 and 10: 
