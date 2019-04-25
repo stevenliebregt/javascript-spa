@@ -1,4 +1,4 @@
-import Component from "../components/Component";
+import Component from '../components/Component';
 
 export default class Number extends Component {
   render() {
@@ -13,7 +13,7 @@ export default class Number extends Component {
       <h1>Number: ${this.parameters.number}</h1>
       <p>
           Go to a page with a random number between 0 and 10: 
-          <a href="#/number/${random}">Number ${random}</a>
+          <a href='#/number/${random}'>Number ${random}</a>
       </p>
     `;
   };

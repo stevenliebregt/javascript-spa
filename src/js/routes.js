@@ -1,6 +1,6 @@
-import Home from "./screens/Home";
-import About from "./screens/About";
-import Number from "./screens/Number";
+import Home from './screens/Home';
+import About from './screens/About';
+import Number from './screens/Number';
 
 export const routes = {
   '/': Home,

@@ -1,5 +1,5 @@
-import Component from "../components/Component";
-import Error404 from "../screens/Error404";
+import Component from '../components/Component';
+import Error404 from '../screens/Error404';
 
 const ROUTE_KEY_REGEX = /^_k(?<index>\d+)$/;
 const PARAMETER_REGEX = /:([a-z0-9_\-]+)/ig;

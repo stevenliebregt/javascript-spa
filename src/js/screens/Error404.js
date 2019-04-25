@@ -1,4 +1,4 @@
-import Component from "../components/Component";
+import Component from '../components/Component';
 
 export default class Error404 extends Component {
   render() {
