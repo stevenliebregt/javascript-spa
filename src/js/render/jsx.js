@@ -6,15 +6,18 @@
 import {config} from '../config';
 
 const PARAMETER_REGEX = new RegExp(`${config.jsxPlaceholderPrefix || '__'}(?<index>\\d+)`);
-const EVENT_ATTRIBUTE_REGEX = /^on(?<event>[a-zA-Z]+)$/;
 
 export default function jsx(parts, ...parameters) {
   let htmlString = createHtmlString(parts);
 
   let parser = new DOMParser();
-  let html = parser.parseFromString(htmlString, 'text/xml');
+  let html = parser.parseFromString(htmlString, 'text/html').body.firstChild;
 
-  return processHtml(html.firstChild, parameters);
+  // console.log(html);
+
+  let dom = createDOM(html);
+
+  return dom;
 }
 
 /**
@@ -39,67 +42,45 @@ function createHtmlString(parts) {
   return htmlString;
 }
 
-function processHtml(node, parameters)
-{
-  // Check if it is a text node.
+function createDOM(node) {
+  // Text node
   if (node.nodeValue) {
-    let value = node.nodeValue; // TODO: Check this
-    // let value = node.nodeValue.trim();
+    let value = node.nodeValue;
 
-    if (value.length === 0) {
+    if (value.trim().length === 0) {
       return undefined;
     }
 
-    return processParameters(value, parameters);
+    // Normal text without parameters
+    if (!PARAMETER_REGEX.test(value)) {
+      return document.createTextNode(value);
+    }
+
+    return parseParameterized(value);
   }
 
+  // 'Normal' node
   let element = document.createElement(node.localName);
 
-  // Handle attributes
-  if (node.attributes.length > 0) {
-    /** @var {Attr} attribute */
-    for (let attribute of node.attributes) {
-      let match = attribute.name.match(EVENT_ATTRIBUTE_REGEX);
-      if (match) {
-        element.addEventListener(match.groups.event, processParameters(attribute.value, parameters, true));
+  // Check children
+  for (let childNode of node.childNodes) {
+    let childElement = createDOM(childNode);
+
+    if (typeof childElement !== 'undefined') {
+      if (childElement instanceof Array) {
+        childElement.forEach(child => {
+          element.append(child);
+        });
       } else {
-        element.setAttribute(attribute.name, processParameters(attribute.value, parameters));
+        element.append(childElement);
       }
     }
-  }
-
-  // Handle children
-  for (let childNode of node.childNodes) {
-    let childElement = processHtml(childNode, parameters);
-
-    if (typeof childElement === 'undefined') {
-      continue;
-    } else if (typeof childElement === 'string') {
-      childElement = document.createTextNode(childElement);
-    }
-
-    element.appendChild(childElement);
   }
 
   return element;
 }
 
-function processParameters(text, parameters, isEvent = false) {
-  let match;
+function parseParameterized(value) {
 
-  while ((match = text.match(PARAMETER_REGEX)) !== null) {
-    let parameter = parameters[match.groups.index];
-
-    if (typeof parameter === 'function') {
-      if (isEvent) {
-        return parameter;
-      }
-
-      // TODO: Nested JSX
-    }
-
-    text = text.replace(PARAMETER_REGEX, parameter);
-  }
-
-  return text;
+  return [];
 }

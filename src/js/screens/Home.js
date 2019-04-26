@@ -3,23 +3,27 @@ import jsx from '../render/jsx';
 
 export default class Home extends Component {
   render() {
-    const foo = 123;
-    const bar = 456;
+    const items = [
+      'banana',
+      'pear',
+      'apple',
+    ];
+
+    const param1 = 2;
+    const param2 = 4;
+    const param3 = 6;
 
     return jsx`
       <div>
-        <h1>Home</h1>
-        <div class="sub">
-          <p>This is subtext</p>
-        </div>
-        <p>Test: ${foo} &amp; ${bar}</p>
-        <button onclick="${this.onClick}">Click</button>
+        <h1>Home & something cool for only &euro; 10.-</h1>
+        <p>${param1} + ${param2} = ${param3}</p>
+        ${this.styledName()}
+        <ol>${items.map(item => `<li>${item}</li>`)}</ol>
       </div>
     `;
   };
 
-  onClick = event => {
-    console.log(event);
-    alert('You clicked the button!');
+  styledName = () => {
+    return jsx`<p>Gustav</p>`;
   };
 }

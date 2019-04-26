@@ -3,10 +3,26 @@ import jsx from '../render/jsx';
 
 export default class About extends Component {
   render() {
+    const items = [
+      'banana',
+      'apple',
+      'pear'
+    ];
+
+    // console.log(items.map(item => {
+    //   return jsx`<li>${item}</li>`;
+    // }));
+
     return jsx`
       <div>
         <h1>About</h1>
         ${this.show()}
+        <h2>I'm curious</h2>
+        <ul>
+          ${items.map(item => {
+            return jsx`<li>${item}</li>`;
+          })}
+        </ul>
       </div>
 `;
   };
