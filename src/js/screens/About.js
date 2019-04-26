@@ -9,14 +9,10 @@ export default class About extends Component {
       'pear'
     ];
 
-    // console.log(items.map(item => {
-    //   return jsx`<li>${item}</li>`;
-    // }));
-
     return jsx`
       <div>
         <h1>About</h1>
-        ${this.show()}
+        ${this.show}
         <h2>I'm curious</h2>
         <ul>
           ${items.map(item => {
@@ -24,7 +20,7 @@ export default class About extends Component {
           })}
         </ul>
       </div>
-`;
+    `;
   };
 
   show = () => {

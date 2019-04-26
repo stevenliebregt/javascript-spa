@@ -5,12 +5,13 @@
     "es6": true
   },
   "rules": {
-    "no-const-assign": "warn",
-    "no-this-before-super": "warn",
-    "no-unreachable": "warn",
+    "no-const-assign": "error",
+    "no-this-before-super": "error",
+    "no-unreachable": "error",
     "no-unused-vars": "warn",
-    "constructor-super": "warn",
-    "valid-typeof": "warn",
-    "quotes": [2, "single", { "allowTemplateLiterals": true }]
+    "constructor-super": "error",
+    "valid-typeof": "error",
+    "quotes": ["error", "single", { "allowTemplateLiterals": true }],
+    "max-len": ["error", { "code": 120 }]
   }
 }
