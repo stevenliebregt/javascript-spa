@@ -15,7 +15,7 @@ export default function jsx(parts, ...parameters) {
 
   // console.log(html);
 
-  let dom = createDOM(html);
+  let dom = createDOM(html, parameters);
 
   return dom;
 }
@@ -42,7 +42,7 @@ function createHtmlString(parts) {
   return htmlString;
 }
 
-function createDOM(node) {
+function createDOM(node, parameters) {
   // Text node
   if (node.nodeValue) {
     let value = node.nodeValue;
@@ -56,7 +56,7 @@ function createDOM(node) {
       return document.createTextNode(value);
     }
 
-    return parseParameterized(value);
+    return parseParameterized(value, parameters);
   }
 
   // 'Normal' node
@@ -64,7 +64,7 @@ function createDOM(node) {
 
   // Check children
   for (let childNode of node.childNodes) {
-    let childElement = createDOM(childNode);
+    let childElement = createDOM(childNode, parameters);
 
     if (typeof childElement !== 'undefined') {
       if (childElement instanceof Array) {
@@ -80,7 +80,35 @@ function createDOM(node) {
   return element;
 }
 
-function parseParameterized(value) {
+function parseParameterized(value, parameters) {
+  let parts = value.split(/(__\d+)/);
+  let nodes = [];
 
-  return [];
+  for (let part of parts) {
+    if (part.trim() === '') {
+      continue;
+    }
+
+    let match = part.match(PARAMETER_REGEX);
+    if (match) {
+      nodes.push(document.createTextNode('[[PARAMETER]]'));
+      continue;
+    }
+
+    nodes.push(document.createTextNode(part));
+  }
+
+  return nodes;
+  // let parsed = [];
+  //
+  // let match;
+  // while ((match = value.match(PARAMETER_REGEX)) !== null) {
+  //   let parameter = parameters[match.groups.index];
+  //   console.log(parameter);
+  //   value = value.replace(PARAMETER_REGEX, ''); // Remove match
+  // }
+  //
+  // console.log(value);
+  //
+  // return parsed;
 }
