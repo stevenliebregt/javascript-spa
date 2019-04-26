@@ -42,6 +42,7 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "xregexp": "^4.2.4"
   }
 }

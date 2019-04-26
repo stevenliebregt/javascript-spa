@@ -1,6 +1,6 @@
 /**
  * I was inspired by the following Gist: https://gist.github.com/lygaret/a68220defa69174bdec5 to build this without
- * using React.
+ * using React, and to make it my own way.
  */
 
 import {config} from '../config';
