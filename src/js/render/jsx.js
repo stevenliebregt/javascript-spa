@@ -7,7 +7,7 @@ import {config} from '../config';
 
 const PARAMETER_REGEX = new RegExp(`${config.jsxPlaceholderPrefix || '__'}(?<index>\\d+)`);
 
-export default function jsx(parts, ...parameters) {
+const jsx = (parts, ...parameters) => {
   let htmlString = createHtmlString(parts);
 
   let parser = new DOMParser();
@@ -18,7 +18,7 @@ export default function jsx(parts, ...parameters) {
   let dom = createDOM(html, parameters);
 
   return dom;
-}
+};
 
 /**
  * Turn the literal parts into a HTML string and replace the parameters with
@@ -27,7 +27,7 @@ export default function jsx(parts, ...parameters) {
  * @param parts The parts of a tagged literal.
  * @returns {string} A HTML string.
  */
-function createHtmlString(parts) {
+const createHtmlString = (parts) => {
   let htmlString = '';
 
   parts.forEach((item, index) => {
@@ -40,9 +40,9 @@ function createHtmlString(parts) {
   });
 
   return htmlString;
-}
+};
 
-function createDOM(node, parameters) {
+const createDOM = (node, parameters) => {
   // Text node
   if (node.nodeValue) {
     let value = node.nodeValue;
@@ -56,7 +56,7 @@ function createDOM(node, parameters) {
       return document.createTextNode(value);
     }
 
-    return parseParameterized(value, parameters);
+    return parseParameterizedString(value, parameters);
   }
 
   // 'Normal' node
@@ -78,9 +78,9 @@ function createDOM(node, parameters) {
   }
 
   return element;
-}
+};
 
-function parseParameterized(value, parameters) {
+const  parseParameterizedString = (value, parameters) => {
   let parts = value.split(/(__\d+)/);
   let nodes = [];
 
@@ -91,7 +91,16 @@ function parseParameterized(value, parameters) {
 
     let match = part.match(PARAMETER_REGEX);
     if (match) {
-      nodes.push(document.createTextNode('[[PARAMETER]]'));
+      let parameter = parameters[match.groups.index];
+
+      if (typeof parameter === 'function') {
+        nodes.push(parameter());
+      } else if (parameter instanceof Array) {
+        parameter.forEach(item => nodes.push(item));
+      } else {
+        nodes.push(document.createTextNode(parameter));
+      }
+
       continue;
     }
 
@@ -99,16 +108,6 @@ function parseParameterized(value, parameters) {
   }
 
   return nodes;
-  // let parsed = [];
-  //
-  // let match;
-  // while ((match = value.match(PARAMETER_REGEX)) !== null) {
-  //   let parameter = parameters[match.groups.index];
-  //   console.log(parameter);
-  //   value = value.replace(PARAMETER_REGEX, ''); // Remove match
-  // }
-  //
-  // console.log(value);
-  //
-  // return parsed;
-}
+};
+
+export default jsx;

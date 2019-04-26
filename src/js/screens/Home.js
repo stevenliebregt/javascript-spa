@@ -16,12 +16,14 @@ export default class Home extends Component {
     return jsx`
       <div>
         <h1>Home & something cool for only &euro; 10.-</h1>
-        <p>${param1}+ ${param2} = ${param3}</p>
+        <p>${param1}+${param2}=${param3}</p>
+        ${this.styledName}
+        <ol>${items.map(item => jsx`<li>Item: ${item}</li>`)}</ol>
       </div>
     `;
   };
 
   styledName = () => {
-    return `<p>Gustav</p>`;
+    return jsx`<p>Gustav</p>`;
   };
 }
