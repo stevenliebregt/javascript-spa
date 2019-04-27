@@ -45,6 +45,13 @@ const createHtmlString = (parts) => {
   return htmlString;
 };
 
+/**
+ * Turn the DOMParser result into our useful DOM with processed attributes.
+ *
+ * @param node The first child of the DOMParser result.
+ * @param parameters The parameters passed to the template literal.
+ * @returns {HTMLElement|Text|Array}
+ */
 const createDOM = (node, parameters) => {
   // Text node
   if (node.nodeValue) {
@@ -129,6 +136,17 @@ const parseParameterizedString = (value, parameters) => {
   return nodes;
 };
 
+/**
+ * Process a node's attribute.
+ *
+ * If the name of the event is one of events, like 'onclick', 'onmouseover' it will be
+ * removed from the node, and set as an event handler.
+ *
+ * @param node The node to process.
+ * @param element The element to apply the attributes to.
+ * @param parameters The parameters passed to the template literal.
+ * @returns {HTMLElement} The element with updated attributes and event handlers.
+ */
 const processAttributes = (node, element, parameters) => {
   for (let attribute of node.attributes) {
     let match = attribute.name.match(/^on([a-zA-Z]+)$/);
@@ -176,6 +194,16 @@ const processEventAttribute = (element, event, attribute, parameters) => {
   }
 };
 
+/**
+ * Apply 'normal' attributes to an element.
+ *
+ * If there are any parameters in the attribute, they will be replaced by
+ * their values.
+ *
+ * @param element The element to process.
+ * @param attribute The attribute we are processing.
+ * @param parameters The parameters passed to the template literal.
+ */
 const processNormalAttribute = (element, attribute, parameters) => {
   let value = attribute.value;
   let match;
