@@ -56,6 +56,8 @@ export default class Router {
       }
     }
 
+    definition.usedParameters = [];
+
     // Inherit parameters
     definition.parameters = {...definition.parameters || {}, ...parameters};
 
@@ -72,10 +74,11 @@ export default class Router {
         continue;
       }
 
+      // Transform group name, since you can only use a name once in a single expression
       let regexName = (name in this.usedGroupNames) ? `${name}_${this.usedGroupNames[name]}` : name;
       url = url.replace(PARAMETER_REGEX, `(?<${regexName}>${definition.parameters[name]})`);
 
-      // TODO: Notify definition
+      definition.usedParameters.push(regexName);
       this.usedGroupNames[name] = (name in this.usedGroupNames) ? this.usedGroupNames[name] + 1 : 1;
     }
 
@@ -94,12 +97,32 @@ export default class Router {
 
   route = () => {
     let request = location.hash.slice(1).toLowerCase() || '/';
-    let matches = XRegExp.exec(request, this.regex);
+    let match = XRegExp.exec(request, this.regex);
 
-    console.log(matches);
+    if (match === null) {
+      return this.render({
+        page: Error404,
+      });
+    }
+
+    for (let [key, value] of Object.entries(match.groups)) {
+      let indexMatch = XRegExp.exec(key, XRegExp('^_k(?<index>\\d+)$'));
+      if (!(indexMatch) || typeof value === 'undefined') {
+        continue;
+      }
+
+      let index = parseInt(indexMatch.groups.index);
+      let definition = Object.values(this.routes)[index];
+
+      return this.render(definition, match.groups);
+    }
+
+    return this.render({
+      page: Error404,
+    });
   };
 
-  // render = (definition, parameters = {}) => {
-  //   console.log('render =>', definition, parameters);
-  // };
+  render = (definition, parameters = {}) => {
+    console.log('render =>', definition.usedParameters);
+  };
 }
