@@ -8,6 +8,13 @@ XRegExp.install({
 });
 
 export default class Router {
+  /**
+   * Create a new router instance.
+   *
+   * @param {HTMLElement} rootElement The root element on the page, this is
+   * where the screen HTML is inserted.
+   * @param  {{}} routes A list of routes.
+   */
   constructor(rootElement, routes) {
     this.rootElement = rootElement;
     this.usedGroupNames = {};
@@ -15,6 +22,16 @@ export default class Router {
     this.regex = this.createRegex();
   }
 
+  /**
+   * Process each route and clean it up and replace parameters with
+   * regular expressions.
+   *
+   * @param {{}} routes A list of routes.
+   * @param {string} prefix The prefix of the current group.
+   * @param {{}} parameters A list of parameters. Used so children inherit the
+   * parameters of their parent.
+   * @param {{}} parsedRoutes A list of routes we have already parsed.
+   */
   parse = (routes, prefix = '', parameters = {}, parsedRoutes = {}) => {
     for (let [url, definition] of Object.entries(routes)) {
       url = prefix + url;
@@ -41,8 +58,8 @@ export default class Router {
   /**
    * Turn the definition and optional parent parameters into a common format.
    *
-   * @param definition
-   * @param parameters
+   * @param {Class|Component|{}} definition The route definition.
+   * @param {{}} parameters The parameters for this definition.
    * @returns {{page: *, parameters: {}}}
    */
   prepare = (definition, parameters) => {
@@ -62,6 +79,13 @@ export default class Router {
     return definition;
   };
 
+  /**
+   * Replace parameter names with their associated regular expressions.
+   *
+   * @param {string} url The URL to transform.
+   * @param {{}} definition The definition for the URL.
+   * @returns {[]} The URL and the definition.
+   */
   transform = (url, definition) => {
     let parameterRegex = /:([a-z0-9_\-]+)/ig;
 
@@ -85,6 +109,11 @@ export default class Router {
     return [url, definition];
   };
 
+  /**
+   * Create a big regular expression from all routes.
+   *
+   * @returns {XRegExp} A regular expression where each route is in a separate group.
+   */
   createRegex = () => {
     let routes = [];
 
@@ -95,6 +124,11 @@ export default class Router {
     return XRegExp(`^(?:${routes.join('|')})$`);
   };
 
+  /**
+   * Handle a request.
+   *
+   * If the route is not matched it will return a {@code Error404} page.
+   */
   route = () => {
     let request = location.hash.slice(1).toLowerCase() || '/';
     let match = XRegExp.exec(request, this.regex);
@@ -122,11 +156,17 @@ export default class Router {
     });
   };
 
+  /**
+   * Render the matched (or 404) route.
+   *
+   * @param {{}} definition The definition of the matched route.
+   * @param {{}} parameters The parameters from the request.
+   */
   render = (definition, parameters = {}) => {
     // Create page instance with parameters
     let pageInstance = new definition.page();
 
-    for (let [name, regexName] of Object.entries(definition.usedParameters)) {
+    for (let [name, regexName] of Object.entries(definition.usedParameters || {})) {
       if (regexName in parameters) {
         pageInstance.parameters[name] = parameters[regexName];
       }
@@ -136,7 +176,7 @@ export default class Router {
     let html = pageInstance.render();
 
     // Check if we used JSX or not
-    if (typeof html === 'object') { // TODO: More specific
+    if (html instanceof HTMLElement || html instanceof Text) {
       // Remove old HTML
       while (this.rootElement.hasChildNodes()) {
         this.rootElement.removeChild(this.rootElement.firstChild);

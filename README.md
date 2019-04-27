@@ -3,6 +3,9 @@
 This is a little JavaScript SPA scaffolding I wrote for myself.
 
 ## Features
+
+ - [Hash based router](#Hash-based-router)
+ - [JSX like tagged template literals](#JSX-like-tagged-template-literals)
  
 ### Hash based router
 
@@ -73,11 +76,28 @@ Below is the HTML that would be generated from the above snippet.
 </div>
 ```
 
-**Some rules are:**
+#### Rules
 
  - The root JSX needs to have only one child, just like React JSX.
  - If you want to nest template literals you'll need to tag them too with `
     jsx` otherwise the HTML will be shown as a plain string.
+
+#### Configuration
+
+There is also a little bit of configuration for the JSX to be found in `src/js/config.js`. These options are:
+
+**jsxPlaceholderPrefix**
+
+This option is used to set a prefix for parameters used in the processor of the tagged template literals. This
+should be a string that is never used in your text, since it will then be seen as a parameter placeholder. The
+default value is `__JSX_PARAM__`.
+
+**jsxAllowEventStringEval**
+
+This option can be used to allow passing functions as strings to event attributes in the JSX. Like this:
+`<button onclick="console.log(this)">Button</button>`, if this is `true` then the actual onclick listener
+for that button will be `() => eval('console.log(this)')`. This is not really safe, thus the default value
+is `false`. Use this at your own risk!
 
 ## Deploying
 
