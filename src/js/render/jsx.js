@@ -4,12 +4,8 @@
  */
 
 import {config} from '../config';
-// import XRegExp from 'xregexp';
-//
-// // Makes XRegExp place groups in a 'groups' property.
-// XRegExp.install({
-//   namespacing: true,
-// });
+
+const PARAMETER_REGEX = new RegExp(`${config.jsxPlaceholderPrefix || '__JSX_PARAM__'}(\\d+)`);
 
 /**
  * Used for tagged literals to allow a JSX like experience within a template literal.
@@ -42,7 +38,7 @@ const createHtmlString = (parts) => {
 
     // Put a placeholder instead of the parameter
     if (index !== parts.length - 1) {
-      htmlString += `${config.jsxPlaceholderPrefix || '__'}${index}`;
+      htmlString += `${config.jsxPlaceholderPrefix || '__JSX_PARAM__'}${index}`;
     }
   });
 
@@ -59,7 +55,7 @@ const createDOM = (node, parameters) => {
     }
 
     // Normal text without parameters
-    if (!/__\d+/.test(value)) { // TODO: Configurable prefix
+    if (!PARAMETER_REGEX.test(value)) {
       return document.createTextNode(value);
     }
 
@@ -102,7 +98,8 @@ const createDOM = (node, parameters) => {
  * @returns {Array} A list of nodes which can be added to the DOM.
  */
 const parseParameterizedString = (value, parameters) => {
-  let parts = value.split(/(__\d+)/); // TODO: Configurable prefix
+  let splitRegex = new RegExp(`(${config.jsxPlaceholderPrefix || '__JSX_PARAM__'}\\d+)`);
+  let parts = value.split(splitRegex);
   let nodes = [];
 
   // Build up the parts to an array containing all parsed parts.
@@ -111,7 +108,7 @@ const parseParameterizedString = (value, parameters) => {
       continue;
     }
 
-    let match = part.match(/__(\d+)/); // TODO: Config prefix
+    let match = part.match(PARAMETER_REGEX);
     if (match) {
       let parameter = parameters[match[1]];
 
@@ -163,7 +160,7 @@ const processEventAttribute = (element, event, attribute, parameters) => {
   let value = attribute.value;
   let match;
 
-  while ((match = value.match(/__(\d+)/)) !== null) {
+  while ((match = value.match(PARAMETER_REGEX)) !== null) {
     let parameter = parameters[match[1]];
 
     if (typeof parameter === 'function') { // We assume the function is an event handler
@@ -171,7 +168,7 @@ const processEventAttribute = (element, event, attribute, parameters) => {
       return;
     }
 
-    value = value.replace(/__(\d+)/, parameter);
+    value = value.replace(PARAMETER_REGEX, parameter);
   }
 
   if (config.jsxAllowEventStringEval || false) { //  Quite dangerous, so no by default
@@ -183,8 +180,8 @@ const processNormalAttribute = (element, attribute, parameters) => {
   let value = attribute.value;
   let match;
 
-  while ((match = value.match(/__(\d+)/)) !== null) { // TODO: Config prefix and dupe
-    value = value.replace(/__(\d+)/, parameters[match[1]]);
+  while ((match = value.match(PARAMETER_REGEX)) !== null) {
+    value = value.replace(PARAMETER_REGEX, parameters[match[1]]);
   }
 
   element.setAttribute(attribute.name, value);
