@@ -56,7 +56,7 @@ export default class Router {
       }
     }
 
-    definition.usedParameters = [];
+    definition.usedParameters = {};
 
     // Inherit parameters
     definition.parameters = {...definition.parameters || {}, ...parameters};
@@ -78,7 +78,7 @@ export default class Router {
       let regexName = (name in this.usedGroupNames) ? `${name}_${this.usedGroupNames[name]}` : name;
       url = url.replace(PARAMETER_REGEX, `(?<${regexName}>${definition.parameters[name]})`);
 
-      definition.usedParameters.push(regexName);
+      definition.usedParameters[name] = regexName;
       this.usedGroupNames[name] = (name in this.usedGroupNames) ? this.usedGroupNames[name] + 1 : 1;
     }
 
@@ -123,6 +123,29 @@ export default class Router {
   };
 
   render = (definition, parameters = {}) => {
-    console.log('render =>', definition.usedParameters);
+    // Create page instance with parameters
+    let pageInstance = new definition.page();
+
+    for (let [name, regexName] of Object.entries(definition.usedParameters)) {
+      if (regexName in parameters) {
+        pageInstance.parameters[name] = parameters[regexName];
+      }
+    }
+
+    // Get the HTML and replace the root
+    let html = pageInstance.render();
+
+    // Check if we used JSX or not
+    if (typeof html === 'object') { // TODO: More specific
+      // Remove old HTML
+      while (this.rootElement.hasChildNodes()) {
+        this.rootElement.removeChild(this.rootElement.firstChild);
+      }
+
+      // Set new HTML
+      this.rootElement.appendChild(html);
+    } else {
+      this.rootElement.innerHTML = html;
+    }
   };
 }
