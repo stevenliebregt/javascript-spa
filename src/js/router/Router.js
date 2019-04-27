@@ -7,8 +7,6 @@ XRegExp.install({
   namespacing: true,
 });
 
-const PARAMETER_REGEX = /:([a-z0-9_\-]+)/ig;
-
 export default class Router {
   constructor(rootElement, routes) {
     this.rootElement = rootElement;
@@ -65,8 +63,10 @@ export default class Router {
   };
 
   transform = (url, definition) => {
+    let parameterRegex = /:([a-z0-9_\-]+)/ig;
+
     let match;
-    while ((match = PARAMETER_REGEX.exec(url))) {
+    while ((match = parameterRegex.exec(url))) {
       let name = match[1];
 
       if (!(name in definition.parameters)) {
@@ -76,7 +76,7 @@ export default class Router {
 
       // Transform group name, since you can only use a name once in a single expression
       let regexName = (name in this.usedGroupNames) ? `${name}_${this.usedGroupNames[name]}` : name;
-      url = url.replace(PARAMETER_REGEX, `(?<${regexName}>${definition.parameters[name]})`);
+      url = url.replace(parameterRegex, `(?<${regexName}>${definition.parameters[name]})`);
 
       definition.usedParameters[name] = regexName;
       this.usedGroupNames[name] = (name in this.usedGroupNames) ? this.usedGroupNames[name] + 1 : 1;
