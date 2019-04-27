@@ -1,12 +1,16 @@
 import Component from '../components/Component';
 import Error404 from '../screens/Error404';
+import XRegExp from 'xregexp';
 
-const ROUTE_KEY_REGEX = /^_k(?<index>\d+)$/;
-const PARAMETER_REGEX = /:([a-z0-9_\-]+)/ig;
+// Makes XRegExp place groups in a 'groups' property.
+XRegExp.install({
+  namespacing: true,
+});
 
 export default class Router {
   constructor(rootElement, routes) {
     this.rootElement = rootElement;
+    this.usedGroupNames = {};
     this.routes = this.parse(routes);
     this.regex = this.createRegex();
   }
@@ -20,13 +24,13 @@ export default class Router {
       if ('children' in definition) {
         parsedRoutes = this.parse(definition['children'], url, (definition['parameters'] || {}), parsedRoutes);
 
-        if (!('page' in definition)) { // The 'group' can also ba a page
+        if (!('page' in definition)) { // Group leader is not a page
           continue;
         }
       }
 
       // Replace parameters with regular expressions
-      url = url.indexOf(':') > -1 ? this.transform(url, definition.parameters) : url;
+      [url, definition] = url.indexOf(':') > -1 ? this.transform(url, definition) : [url, definition];
 
       parsedRoutes[url.replace(/\//g, '\\/')] = definition;
     }
@@ -34,6 +38,13 @@ export default class Router {
     return parsedRoutes;
   };
 
+  /**
+   * Turn the definition and optional parent parameters into a common format.
+   *
+   * @param definition
+   * @param parameters
+   * @returns {{page: *, parameters: {}}}
+   */
   prepare = (definition, parameters) => {
     // Normalize
     if (definition.__proto__.name === Component.name) {
@@ -43,31 +54,35 @@ export default class Router {
       }
     }
 
+    definition.usedParameters = {};
+
     // Inherit parameters
     definition.parameters = {...definition.parameters || {}, ...parameters};
 
     return definition;
   };
 
-  transform = (url, parameters) => {
-    let matches = url.match(PARAMETER_REGEX);
+  transform = (url, definition) => {
+    let parameterRegex = /:([a-z0-9_\-]+)/ig;
 
-    for (let match of matches) {
-      let name = match.substring(1);
-      if (ROUTE_KEY_REGEX.test(name)) {
-        console.error(`Parameter names must match the format ${PARAMETER_REGEX}`);
-        continue;
-      }
+    let match;
+    while ((match = parameterRegex.exec(url))) {
+      let name = match[1];
 
-      if (!(name in parameters)) {
+      if (!(name in definition.parameters)) {
         console.error(`Parameter "${name}" has no description in route definition`);
         continue;
       }
 
-      url = url.replace(match, `(?<${name}>${parameters[name]})`);
+      // Transform group name, since you can only use a name once in a single expression
+      let regexName = (name in this.usedGroupNames) ? `${name}_${this.usedGroupNames[name]}` : name;
+      url = url.replace(parameterRegex, `(?<${regexName}>${definition.parameters[name]})`);
+
+      definition.usedParameters[name] = regexName;
+      this.usedGroupNames[name] = (name in this.usedGroupNames) ? this.usedGroupNames[name] + 1 : 1;
     }
 
-    return url;
+    return [url, definition];
   };
 
   createRegex = () => {
@@ -77,12 +92,12 @@ export default class Router {
       routes.push(`(?<_k${index}>${route})`);
     });
 
-    return new RegExp(`^(?:${routes.join('|')})$`);
+    return XRegExp(`^(?:${routes.join('|')})$`);
   };
 
   route = () => {
     let request = location.hash.slice(1).toLowerCase() || '/';
-    let match = this.regex.exec(request);
+    let match = XRegExp.exec(request, this.regex);
 
     if (match === null) {
       return this.render({
@@ -91,15 +106,15 @@ export default class Router {
     }
 
     for (let [key, value] of Object.entries(match.groups)) {
-      let indexMatch = ROUTE_KEY_REGEX.exec(key);
+      let indexMatch = XRegExp.exec(key, XRegExp('^_k(?<index>\\d+)$'));
       if (!(indexMatch) || typeof value === 'undefined') {
         continue;
       }
 
       let index = parseInt(indexMatch.groups.index);
-      let route = Object.values(this.routes)[index];
+      let definition = Object.values(this.routes)[index];
 
-      return this.render(route, match.groups);
+      return this.render(definition, match.groups);
     }
 
     return this.render({
@@ -107,19 +122,21 @@ export default class Router {
     });
   };
 
-  render = (route, matches = {}) => {
-    let instance = new route.page();
+  render = (definition, parameters = {}) => {
+    // Create page instance with parameters
+    let pageInstance = new definition.page();
 
-    for (let key of Object.keys(route.parameters || {})) {
-      if (key in matches) {
-        instance.parameters[key] = matches[key];
+    for (let [name, regexName] of Object.entries(definition.usedParameters)) {
+      if (regexName in parameters) {
+        pageInstance.parameters[name] = parameters[regexName];
       }
     }
 
-    let html = instance.render();
+    // Get the HTML and replace the root
+    let html = pageInstance.render();
 
     // Check if we used JSX or not
-    if (typeof html === 'object') {
+    if (typeof html === 'object') { // TODO: More specific
       // Remove old HTML
       while (this.rootElement.hasChildNodes()) {
         this.rootElement.removeChild(this.rootElement.firstChild);
