@@ -21,3 +21,25 @@
 .darkblue {
     background-color: darkblue;
 }
+
+.fancy-card {
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+
+    &:before {
+        content: '==> this is fancy-card';
+    }
+
+    .fancy-card-heading {
+        &:before {
+            content: '==> this is fancy-heading';
+        }
+    }
+
+    .fancy-card-content {
+        &:before {
+            content: '==> this is fancy-content';
+        }
+    }
+}

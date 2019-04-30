@@ -1,6 +1,7 @@
 import Home from './screens/Home';
 import About from './screens/About';
 import Number from './screens/Number';
+import Components from './screens/Components';
 
 export const routes = {
   '/': Home,
@@ -11,4 +12,5 @@ export const routes = {
       number: '\\d+',
     },
   },
+  '/components': Components,
 };

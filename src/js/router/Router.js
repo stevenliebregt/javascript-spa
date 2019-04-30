@@ -177,6 +177,11 @@ export default class Router {
 
     // Check if we used JSX or not
     if (html instanceof HTMLElement || html instanceof Text) {
+      // Remove children placeholders
+      Object.values(html.getElementsByTagName('children')).forEach(placeholder => {
+        placeholder.parentNode.removeChild(placeholder);
+      });
+
       // Remove old HTML
       while (this.rootElement.hasChildNodes()) {
         this.rootElement.removeChild(this.rootElement.firstChild);

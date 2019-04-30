@@ -70,7 +70,12 @@ const createDOM = (node, parameters) => {
   }
 
   // 'Normal' node
-  let element = document.createElement(node.localName);
+  let element;
+  if (node.localName in config.customElements) {
+    element = new config.customElements[node.localName]().render();
+  } else {
+    element = document.createElement(node.localName);
+  }
 
   // Process attributes of node
   element = processAttributes(node, element, parameters);
@@ -80,17 +85,51 @@ const createDOM = (node, parameters) => {
     let childElement = createDOM(childNode, parameters);
 
     if (typeof childElement !== 'undefined') {
-      if (childElement instanceof Array) {
-        childElement.forEach(child => {
-          element.append(child);
-        });
+      if (node.localName in config.customElements) {
+        insertCustomChild(element, childElement);
       } else {
-        element.append(childElement);
+        insertNormalChild(element, childElement);
       }
     }
   }
 
   return element;
+};
+
+const insertCustomChild = (element, childElement) => {
+  let childrenElements = element.getElementsByTagName('children');
+  if (childrenElements.length < 1) { // The target doesnt have a place for children
+    return;
+  }
+  let childrenElement = childrenElements[0];
+
+  if (childElement instanceof Array) {
+    childElement.forEach(child => {
+      childrenElement.parentNode.insertBefore(child, childrenElement);
+    });
+  } else {
+    childrenElement.parentNode.insertBefore(childElement, childrenElement);
+  }
+};
+
+const insertNormalChild = (element, childElement) => {
+  if (childElement instanceof Array) {
+    childElement.forEach(child => {
+      element.append(child);
+    });
+  } else {
+    element.append(childElement);
+  }
+};
+
+const removeChildrenPlaceholders = () => {
+  let childrenElements = element.getElementsByTagName('children');
+
+  if (childrenElements.length < 1) { // The target doesnt have a place for children
+    return;
+  }
+
+
 };
 
 /**
